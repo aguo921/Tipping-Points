@@ -18,10 +18,10 @@ Optional: Use a virtual environment.
 
 ## Directories
 
-### Mean-Field Simulations
+### Mean-field Simulations
 
-This directory includes simulations of the stochastic differential equation $dx=f(x,y)dt+\sigma dW$, where $x$ is the dependent variable and $y$ is a slow-changing bifurcation parameter.
+The `Mean-Field-Simulations` directory includes simulations of the stochastic differential equation $dx=f(x,y)dt+\sigma dW$, where $x$ is the dependent variable and $y$ is a slow-changing bifurcation parameter.
 
 ### Spatial Simulations
 
-This directory includes simulations on 2D spatial models.
+The `Spatial-Simulations` directory includes simulations on 2D spatial models.
