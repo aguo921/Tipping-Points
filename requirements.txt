@@ -1,0 +1,9 @@
+numpy
+pandas
+matplotlib
+IPython
+scipy
+blosc
+pickle
+streamlit
+torch
