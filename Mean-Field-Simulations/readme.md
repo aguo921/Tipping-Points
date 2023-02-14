@@ -47,7 +47,7 @@ This file creates an app interface with user input on the simulation settings. P
 Run
 
 ```bash
-streamlit run "Mean-Field Simulations/app.py"
+streamlit run Mean-Field-Simulations/app.py
 ```
 
 to open the app.
