@@ -39,6 +39,42 @@ def plot_snapshots(snapshots, param_values, param_label=None, vmin=None, vmax=No
         axs[i].set_title(f"{param_label} = {param_values[i]:.{precision}f}")
         axs[i].axis("off")
 
+    fig.set_size_inches(2*len(param_values), 2)
+
+
+def plot_distributions(snapshots, param_values, param_label=None, precision=1):
+    """ Plot distributions of values in snapshots at given parameter levels.
+
+        Parameters
+        ----------
+        snapshots : Series
+            Spatial snapshots at different parameter levels.
+        param_values : list of floats
+            Control parameter values at which to plot snapshot distributions.
+        param_label : str, optional
+            Parameter name.
+        precision : int, default=1
+            Number of decimal places to display of parameter value.
+    """
+    fig, axs = plt.subplots(ncols = len(param_values))
+
+    for i in range(len(param_values)):
+        # get snapshot at parameter value
+        snapshot = snapshots.iloc[np.argmin(np.abs(snapshots.index - param_values[i]))]
+
+        # set title of axes
+        title = f"{param_values[i]:.{precision}f}"
+        if param_label:
+            title = f"{param_label} = {title}"
+
+        axs[i].hist(snapshot.flatten(), density=True)
+        axs[i].set_title(f"{param_label} = {param_values[i]:.{precision}f}")
+
+    axs[0].set_ylabel("Density")
+
+    fig.tight_layout()
+    fig.set_size_inches(2*len(param_values), 2)
+
 
 def animate_snapshots(snapshots, vmin=None, vmax=None, step=1):
     """ Animate snapshots as the control parameter changes.
