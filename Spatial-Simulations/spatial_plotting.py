@@ -368,5 +368,5 @@ def plot_time_simulations(model, initial, time_steps):
     ax.plot(snapshots.index, [equilibria_values[0]]*len(snapshots.index), linestyle='--', color='r')
 
     # axis labels
-    ax.set_xlabel("Spatial Mean")
-    ax.set_ylabel("t")
+    ax.set_ylabel("Spatial Mean")
+    ax.set_xlabel("t")
