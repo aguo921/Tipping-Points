@@ -42,6 +42,30 @@ Four spatial models are simulated over a slow change in a bifurcation parameter 
 
     $\frac{\partial v}{\partial t}=v(b-cu^2v)+d\nabla^2v+\sigma dW$
 
+    Note: This model is a system of two partial differential equations exhibiting Turing patterns, serving as a simpler version of the scale-dependent feedback model but without ecological context.
+
+## Simulation
+
+### Change in Environmental Parameter
+
+We simulated each model while slowly changing an environmental parameter. For the local positive feedback model and the scale-dependent feedback model, this is the rainfall value $R$. For the local facilitation model, this is the aridity level $b$, where lower values indicate harsher conditions.
+
+At each control parameter level, we simulated many time steps to allow the system to settle to equilibrium. We took the initial state at each control parameter level to be the final stationary state of the previous control parameter level.
+
+We started the simulation at the fully vegetated state for the local positive feedback model and the local facilitation model. We started the simulation at the homogeneous equilibrium for the scale-dependent feedback model and the Turing model.
+
+### Effect of Noise
+
+We simulated each model while slowly changing an environmental parameter with different levels of noise on the state variables. We also simulated the effect of additive noise and multiplicative, or state-dependent, noise.
+
+We also simulated the scale-dependent feedback model and Turing model near the Turing instability point while slowly increasing the noise to investigate the effect of noise on pattern formation.
+
+### Preventive Measures
+
+We simulated each model while slowly changing an environmental parameter. When the environmental parameter reaches a certain value near the collapse of vegetation, we begin reducing a second parameter representing grazing/mortality to try to prevent collapse.
+
+We simulate different environmental parameter rates with different grazing/mortality reduction rates to see when the preventive measures result in recovery of the system.
+
 ## Spatial Indicators
 
 As a system approaches a critical transition, early warning signals in spatial indicators can arise due to critical slowing down, which occurs as recovery from small perturbations become increasingly slower.
@@ -74,6 +98,40 @@ The Discrete Fourier Transform (DFT) decomposes the spatial variation into a sum
 
 The radial spectrum ($r$-spectrum) can be obtained by the summing the power spectrum at constant distances from the origin. The wavenumber at which the peak occurs is the characteristic spatial frequency of the pattern.
 
+## Numerical Methods
+
+### Finite Difference Method
+
+The spatial system is discretised into a lattice. The finite difference method is used to approximate the Laplace operator.
+
+The 5-point stencil approximation of the Laplace operator
+
+$\nabla^2 u_{i,j}=\frac{1}{\Delta x}^2(u_{i+1,j}+u_{i-1,j}+u_{i,j+1}+u_{i,j-1}-4u_{i,j})$
+
+takes into account diffusion across nearest (top/bottom and left/right) neighbours and is generally numerically stable for sufficiently smooth fields.
+
+The 9-point stencil approximation of the Laplace operator
+
+$\nabla^2 u_{i,j}=\frac{1}{\Delta x}^2[0.5(u_{i+1,j}+u_{i-1,j}+u_{i,j+1}+u_{i,j-1})+0.25(u_{i+1,j+1}+u_{i-1,j+1}+u_{i-1,j+1}+u_{i-1,j-1})-3u_{i,j}]$
+
+takes into account diffusion across nearest and diagonal neighbours. Diagonal neighbours have half weight due to being further from the centre. Due to its more isotropic form, it is more numerically stable and thus more suitable for rapidly varying dynamics.
+
+### Euler-Maruyama Method
+
+The Euler-Maruyama method is used to numerically approximate a solution to a stochastic differential equation.
+
+Suppose we have the stochastic differential equation of the form $dx=f(x,t)dt+\sigma dW$. The forward update equation is $x_{n+1}=x_n+f(x,t)\Delta t+\sigma\Delta W$, where $\Delta W\sim N(0,\Delta t)$.
+
+Since we discretise the system of stochastic partial differential equations into a lattice of coupled stochastic ordinary differential equations, we can implement the Euler-Maruyama method on each grid point. 
+
+## Diffusion-Driven Instability
+
+Pattern formation occurs due to diffusion-driven instability in the scale-dependent feedback model and Turing model. Diffusion-driven instability occurs when the spatially homogeneous equilibrium is linearly stable to uniform perturbations but linearly unstable to spatially heterogenous perturbations, which lead to self-organised patterns stabilised by local nonlinearities.
+
+The homogeneous equilibrium is linearly stable to uniform perturbations when the Jacobian matrix of the system without the presence of diffusion evaluated at the homogeneous equilibrium has only negative real parts of the eigenvalues.
+
+The homogeneous equilibrium is linearly unstable to spatially heterogeneous perturbations when the dispersion relation $|I\sigma-J+Dk^2|=0$ has positive real parts of the eigenvalues for any wavenumber $k$. The wavenumber $k_{max}$ at which the maximum positive eigenvalue real part occurs is the dominant mode and thus the characeteristic spatial frequency of the pattern.
+
 ## Function Files
 
 ### `spatial_models.py`
@@ -95,7 +153,6 @@ Note: Power/radial spectra functions have not been verified.
 This file defines functions to visualise spatial snapshots, plot spatial indicators, plot equilibria and plot maximum eigenvalues.
 
 ## Notebooks
-
 
 ### `spatial_simulation.ipynb`
 
