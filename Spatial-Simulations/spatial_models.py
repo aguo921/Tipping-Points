@@ -321,8 +321,30 @@ class LocalFacilitationModel:
         """
         return np.ones((self.size, self.size)),
 
-    def vegetation_cover(self, snapshots):
-        """ Calculate vegetation cover as a fraction of vegetated cells over each 4x4 group of cells in each snapshot.
+    def vegetation_cover(self, snapshots, s=4):
+        """ Calculate vegetation cover as a fraction of vegetated cells over each sxs group of cells in each snapshot.
+
+            Parameters
+            ----------
+            snapshots : Series
+                Spatial snapshots at each control parameter level.
+            s : int, default=4
+                Coarse-graining submatrix size.
+
+            Returns
+            -------
+            Series
+                Vegetation cover for each snapshot.
+        """
+        cover = []
+
+        for snapshot in snapshots:
+            cover.append(coarse_graining(np.where(snapshot == 1, 1, 0), s))
+
+        return pd.Series(cover, index=snapshots.index)
+
+    def vegetation_patchiness(self, snapshots):
+        """ Calculate vegetation patchiness in each snapshot.
 
             Parameters
             ----------
@@ -332,16 +354,37 @@ class LocalFacilitationModel:
             Returns
             -------
             Series
-                Vegetation cover for each snapshot.
+                Vegetation patchiness for each snapshot.
         """
-        cover = []
+        patchiness = []
 
-        for i in range(len(snapshots)):
-            snapshot = snapshots.iloc[i]
+        N = self.size**2  # number of cells in the grid
 
-            cover.append(coarse_graining(np.where(snapshot == 1, 1, 0), 2))
+        for snapshot in snapshots:
+            snapshot = np.where(snapshot == 1, 1, 0)
 
-        return pd.Series(cover, index=snapshots.index)
+            # calculate the global vegetation density
+            global_vegetation = np.sum(snapshot) / N
+
+            # get neighbours
+            top = np.roll(snapshot, (0, 1), (0, 1))
+            bottom = np.roll(snapshot, (0, -1), (0, 1))
+            right = np.roll(snapshot, (1, 0), (0, 1))
+            left = np.roll(snapshot, (-1, 0), (0, 1))
+
+            # calculate number of vegetated neighbours if the cell is vegetated
+            vegetated_neighbours = np.where(snapshot == 1, top + bottom + right + left, 0)
+
+            # calculate the density of vegetated pairs
+            vegetated_pairs = np.sum(vegetated_neighbours) / (4*N)
+
+            # calculate the patchiness
+            if global_vegetation != 0:
+                patchiness.append(vegetated_pairs / global_vegetation**2)
+            else:
+                patchiness.append(np.NaN)
+
+        return pd.Series(patchiness, index=snapshots.index)
 
     def reactions(self, V, D):
         """ Return the reaction rates of the density of vegetated cells and degraded cells of the mean-field approximation.
