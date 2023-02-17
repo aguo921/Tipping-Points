@@ -64,36 +64,18 @@ def spatial_correlation(snapshot):
         float
             Spatial correlation.
     """
-    C = 0  # Moran's coefficient
+    mean = np.mean(snapshot.flatten())  # spatial mean
 
-    nrows, ncols = snapshot.shape  # number of rows and columns
+    sum_squares = np.sum((snapshot - mean)**2)
 
-    flattened_snapshot = snapshot.flatten()  # convert snapshot from 2D to 1D
-
-    mean = np.mean(flattened_snapshot)  # spatial mean
-
-    # sum of squared difference between each cell and mean
-    sum_squares = sum((x - mean)**2 for x in flattened_snapshot)
-
-    # shift values in snapshot by 1
+    # get nearest neighbours
     top = np.roll(snapshot, (0, 1), (1, 0))
     bottom = np.roll(snapshot, (0, -1), (1, 0))
     left = np.roll(snapshot, (-1, 0), (1, 0))
     right = np.roll(snapshot, (1, 0), (1, 0))
 
-    # loop through each cell in snapshot
-    for i in range(nrows):
-        for j in range(ncols):
-            cell = snapshot[i,j]
-
-            # get neighbours
-            neighbours = np.array([top[i,j], bottom[i,j], left[i,j], right[i,j]])
-
-            # update Moran's coefficient and number of neighbouring pairs
-            C += (cell - mean)*np.sum(neighbours - mean)
-            # sum((neighbour - mean) for neighbour in neighbours)
-    
     # calculate Moran's coefficient
+    C = np.sum((snapshot - mean)*(top + bottom + left + right - 4*mean))
     if sum_squares == 0:
         return np.NaN
     else:
