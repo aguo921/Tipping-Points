@@ -999,10 +999,8 @@ def simulate_time_steps(model, time_steps, *u):
     """
     snapshots = []
 
-    # range of time values
-    t = np.arange(time_steps)
-    if hasattr(model, "dt"):
-        t = model.dt*t
+    dt = model.dt*t if hasattr(model, "dt") else 1  # set time step
+    t = dt*np.arange(time_steps)  # range of time values
 
     # loop through each time step
     for _ in t:
@@ -1012,7 +1010,7 @@ def simulate_time_steps(model, time_steps, *u):
     return pd.Series(snapshots, index=t, dtype="object")
 
 
-def parameter_change(model, p, parameter_name, time_steps=100, warm_up=0):
+def parameter_change(model, p, parameter_name, time_steps=100, warm_up=0, u=None):
     """ Simulate the model a number of time steps at each control parameter level.
 
         Parameters
@@ -1027,16 +1025,25 @@ def parameter_change(model, p, parameter_name, time_steps=100, warm_up=0):
             Number of time steps to simulate at each parameter level.
         warm_up : int, default=0.
             Number of time steps to simulate on initial variable values.
+        u : tuple of ndarrays, optional
+            Initial variable values.
+        return_final : bool, default=False
+            Whether to return final variable values.
 
         Returns
         -------
-        Series
+        snapshots : Series
             Snapshots of first variable at each control parameter level.
+        u : tuple of ndarrays
+            Variable values at end of final simulation.
+        
     """
     # set parameter to first value in parameter range
     setattr(model, parameter_name, p[0])
     
-    u = model.initialisation()  # initialise variables
+    # initialise variables
+    if u is None:
+        u = model.initialisation()
     
     snapshots = []  # initialise snapshots list
 
@@ -1049,6 +1056,120 @@ def parameter_change(model, p, parameter_name, time_steps=100, warm_up=0):
         snapshots.append(u[0].copy())  # store snapshot of first variable (discarding transients)
 
     return pd.Series(snapshots, index=p, dtype="object")
+
+
+def bound(x, lower, upper):
+    """ Bound a value between a lower and upper bound.
+
+        Parameters
+        ----------
+        x : float
+            Value to be bounded.
+        lower : float
+            Lower bound.
+        upper : float
+            Upper bound.
+
+        Returns
+        -------
+        x : float
+            Bounded value.    
+    """
+    if upper is not None:
+        x = min(x, upper)
+    if lower is not None:
+        x = max(x, lower)
+    return x
+
+
+def preventive_measure(model, time_steps, a0, da, b0, db, a_name, b_name, preventive_point, a_bounds=None, b_bounds=None, u=None, warm_up=100):
+    """ Simulate the model while changing a primary parameter level. A secondary parameter level begins changing when the primary parameter passes a certain value.
+
+        Parameters
+        ----------
+        model : obj
+            Model object.
+        time_steps : int
+            Total number of time steps to simulate.
+        a0 : float
+            Initial primary parameter value.
+        da : float
+            Step in primary parameter value per time step.
+        b0 : float
+            Initial secondary parameter value.
+        db : list of floats
+            Steps in secondary parameter value per time step.
+        preventive_point : float
+            Primary parameter value at which secondary parameter begins changing.
+        a_bounds : tuple of ints, optional
+            Lower and upper bounds of primary parameter.
+        b_bounds : tuple of ints, optional
+            Lower and upper bounds of secondary parameter.
+        u : int, optional
+            Initial variable values. If None, warm up the system to the equilibrium.
+        warm_up : int, default=100
+            Number of time steps to warm up system.
+
+        Returns
+        all_snapshots : list of Series
+            List of snapshots both before preventive measures and after preventive measures at different rates of the secondary parameter.
+    """
+    all_snapshots = []
+
+    # initialise variables
+    if u is None:
+        u = model.initialisation()
+        setattr(model, a_name, a0)  # set initial primary parameter
+        setattr(model, b_name, b0)  # set initial secondary parameter
+        simulate_time_steps(model, warm_up, *u)  # warm up system to equilibrium
+
+    # default parameter bounds
+    if a_bounds is None:
+        a_bounds = (None, None)
+    if b_bounds is None:
+        b_bounds = (None, None)
+    
+    dt = model.dt if hasattr(model, "dt") else 1  # set time step
+    t = dt*np.arange(time_steps)  # range of time values
+
+    change_idx = int((preventive_point - a0)/da)  # index at which preventive measures are placed
+
+    snapshots = []
+    a = a0  # initial primary parameter
+
+    # simulate system before preventive measures
+    for _ in t[:change_idx]:
+        setattr(model, a_name, a)  # set primary parameter
+
+        model.time_step_update(*u)
+        snapshots.append(u[0].copy())
+
+        a = bound(a + da, *a_bounds)  # update primary parameter
+    
+    all_snapshots.append(pd.Series(snapshots, index=t[:change_idx]))
+
+    # iterate through each rate of secondary parameter
+    for db_step in db:
+        new_u = tuple(x.copy() for x in u)  # copy of variable values at preventive point
+
+        snapshots = []
+        a = preventive_point  # primary parameter at preventive point
+        b = b0  # initial secondary primary
+        
+        # simulate system after preventive measures
+        for _ in t[change_idx:]:
+            setattr(model, a_name, a)  # set primary parameter
+            setattr(model, b_name, b)  # set secondary parameter
+
+            model.time_step_update(*new_u)
+            snapshots.append(new_u[0].copy())
+
+            a = bound(a + da, *a_bounds)  # update primary parameter
+            b = bound(b + db_step, *b_bounds)  # update secondary parameter
+
+        all_snapshots.append(pd.Series(snapshots, index=t[change_idx:]))
+
+    return all_snapshots
 
 
 def jacobian_matrix(model):
