@@ -42,6 +42,37 @@ Four spatial models are simulated over a slow change in a bifurcation parameter 
 
     $\frac{\partial v}{\partial t}=v(b-cu^2v)+d\nabla^2v+\sigma dW$
 
+## Spatial Indicators
+
+As a system approaches a critical transition, early warning signals in spatial indicators can arise due to critical slowing down, which occurs as recovery from small perturbations become increasingly slower.
+
+Suppose the state variable $u$ can be represented in a lattice of side length $N$, where $u_{i,j}$ is the value at the location $(i,j)$ and $\bar{u}$ is the spatial mean.
+
+### Spatial Variance
+
+As a system approaches a critical transition, fluctuations around the equilibrium may become stronger due to slower decay.
+
+$$\sigma^2=\frac{1}{N^2}\sum_{i=1}^N\sum_{j=1}^N(u_{i,j}-\bar{u})^2$$
+
+### Spatial Skewness
+
+As a system approaches a critical transition, fluctuations around the equilibrium may become increasingly asymmetric, as the system recovers slower in the direction of the alternative state than the other. Asymmetry can also arise from local flickering events where local units jump between the current and alternative state.
+
+$$\gamma=\frac{1}{N^2}\sum_{i=1}^N\sum_{j=1}^N\frac{(u_{i,j}-\bar{u})^3}{\sigma^3}$$
+
+### Spatial Correlation
+
+As a system approaches a critical transition, local reactions become weaker and diffusion dominates, making neighbouring units more like each other and thus increasingly correlated. Spatial correlation can be measured by nearest-neighbour Moran's I.
+
+$$C=\frac{\sum_{i=1}^N\sum_{j=1}^N (u_{i,j}-\bar{u})(u_{i+1,j}+u_{i-1,j}+u_{i,j+1}+u_{i,j-1}-4\bar{u})}{4\sum_{i=1}^N\sum_{j=1}^N(u_{i,j}-\bar{u})^2}$$
+
+### Power Spectrum
+
+As a system approaches a critical transition, increased memory can cause spectral reddening, where spatial variance becomes increasingly concentrated at lower wavenumbers.
+
+The Discrete Fourier Transform (DFT) decomposes the spatial variation into a summation of sine and cosine waves. The DFT of a spatial state variable is defined for each pair of $x$ and $y$ wavenumbers and is in general a complex number. Hence, we plot the power spectrum, the modulus of the complex matrix, typically up to wavenumbers $p=\frac{N}{2}$ and $q=\frac{N}{2}$ and scaled by the spatial variance $\sigma^2$.
+
+The radial spectrum ($r$-spectrum) can be obtained by the summing the power spectrum at constant distances from the origin. The wavenumber at which the peak occurs is the characteristic spatial frequency of the pattern.
 
 ## Function Files
 
