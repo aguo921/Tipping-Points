@@ -616,9 +616,17 @@ class ScaleDependentFeedbackModel:
             .. math:: P=c\frac{R-r_W W}{d}
             .. math:: O=\frac{R}{\alpha}\frac{P+k_2}{P+W_0 k_2}
         """
+        # vegetated equilibrium
         W = self.k1*self.d/(self.c*self.gmax - self.d)
-        P = max(0., self.c/self.d*(self.R - self.rW*W))
+        P = self.c/self.d*(self.R - self.rW*W)
         O = self.R/self.alpha*(P + self.k2)/(P + self.W0*self.k2)
+
+        # plantless equilibrium
+        if P <= 0:
+            P = 0
+            W = self.R/self.rW
+            O = self.R/(self.alpha*self.W0)
+
 
         return P, W, O
     
