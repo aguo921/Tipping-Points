@@ -666,10 +666,9 @@ class ScaleDependentFeedbackModel:
 
         # plantless equilibrium
         if P <= 0:
-            P = 0
+            P = 0.
             W = self.R/self.rW
             O = self.R/(self.alpha*self.W0)
-
 
         return P, W, O
     
@@ -1050,7 +1049,7 @@ def simulate_time_steps(model, time_steps, *u):
     """
     snapshots = []
 
-    dt = model.dt*t if hasattr(model, "dt") else 1  # set time step
+    dt = model.dt if hasattr(model, "dt") else 1  # set time step
     t = dt*np.arange(time_steps)  # range of time values
 
     # loop through each time step
@@ -1172,7 +1171,7 @@ def preventive_measure(model, time_steps, a0, da, b0, db, a_name, b_name, preven
         u = model.initialisation()
         setattr(model, a_name, a0)  # set initial primary parameter
         setattr(model, b_name, b0)  # set initial secondary parameter
-        simulate_time_steps(model, warm_up, *u)  # warm up system to equilibrium
+    simulate_time_steps(model, warm_up, *u)  # warm up system to equilibrium
 
     # default parameter bounds
     if a_bounds is None:
