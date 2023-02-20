@@ -20,7 +20,7 @@ Biomass and water are exchanged between neighbouring cells through diffusion. He
 
 This model is a stochastic cellular automaton (Kefi et al. 2007) [[3]](https://doi.org/10.1016/j.tpb.2006.09.003) describing the states of cells: vegetated (+), empty (0) or degraded (-). The grid of cells evolves at each discrete time step through the transition probabilities:
 
-1. Colonisation: $w_{[0,+]}=[\delta\rho_+ +(1-\delta)q_{+|0}](b-c\rho_+)$
+1. Colonisation: $w_{[0,+]}=\[\delta\rho_+ +(1-\delta)q_{+|0}\](b-c\rho_+)$
 
 2. Mortality: $w_{[+,0]}=m$
 
