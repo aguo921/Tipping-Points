@@ -141,7 +141,7 @@ def plot_spatial_indicator(ax, snapshots, indicator, param=None, n=1):
     return line
 
 
-def plot_spatial_indicator_grid(axs, snapshots, indicators, param, n, legend_loc):
+def plot_spatial_indicator_grid(axs, snapshots, indicators, shape, param, n, legend_loc):
     """ Plot spatial indicators against control parameter level on sets of axes.
 
         Parameters
@@ -152,6 +152,8 @@ def plot_spatial_indicator_grid(axs, snapshots, indicators, param, n, legend_loc
             Spatial snapshots at each parameter level.
         indicators : list of strings
             Spatial indicators to calculate (`"mean"`, `"variance"`, `"skewness"` or `"correlation"`).
+        shape : tuple of ints
+            Number of rows and columns in grid.
         param : str
             Control parameter name.
         n : int
@@ -165,21 +167,30 @@ def plot_spatial_indicator_grid(axs, snapshots, indicators, param, n, legend_loc
             Line object on first set of axes.
     """
     idx = 0
-    nrows, ncols = axs.shape
+    nrows, ncols = shape
 
     for i in range(nrows):
         for j in range(ncols):
+            # get axis
+            if nrows == 1:
+                ax = axs[j]
+            elif ncols == 1:
+                ax = axs[i]
+            else:
+                ax = axs[i][j]
+
+            # plot line
             if legend_loc == (i, j):
-                line = plot_spatial_indicator(axs[i][j], snapshots, indicators[idx], param, n)
+                line = plot_spatial_indicator(ax, snapshots, indicators[idx], param, n)
             elif idx < len(indicators):
-                plot_spatial_indicator(axs[i][j], snapshots, indicators[idx], param, n)
+                plot_spatial_indicator(ax, snapshots, indicators[idx], param, n)
 
             idx += 1
 
     return line
 
 
-def spatial_indicator_grid(snapshots, param=None, indicators=None, shape=None, levels=None, level_name=None, n=1, legend_loc=None):
+def spatial_indicator_grid(snapshots, param=None, indicators=None, shape=None, levels=None, level_name=None, n=1, legend_loc=None, return_fig=False):
     """ Plot spatial indicators against control parameter level. If there are multiple levels of snapshots, plot multiple 
         lines on each set of axes.
 
@@ -202,6 +213,13 @@ def spatial_indicator_grid(snapshots, param=None, indicators=None, shape=None, l
             Number of control parameter increments per spatial indicator calculation.
         legend_loc : tuple of ints, optional
             Location of axes to place legend on.
+        return_fig : bool, default=False
+            Whether to return the figure object.
+
+        Returns
+        -------
+        fig : obj
+            Figure object if `return_fig` is `True`, otherwise `None`.
     """
     # default indicators
     if indicators is None:
@@ -209,9 +227,9 @@ def spatial_indicator_grid(snapshots, param=None, indicators=None, shape=None, l
     
     # default shape
     if shape is None:
-        nrows, ncols = (2, 2)
-    else:
-        nrows, ncols = shape
+        shape = (2, 2)
+    
+    nrows, ncols = shape
 
     # default legend location
     if legend_loc is None:
@@ -226,7 +244,7 @@ def spatial_indicator_grid(snapshots, param=None, indicators=None, shape=None, l
         # plot each level and save the lines
         lines = []
         for snapshots_level in snapshots:
-            lines.append(plot_spatial_indicator_grid(axs, snapshots_level, indicators, param, n, legend_loc))
+            lines.append(plot_spatial_indicator_grid(axs, snapshots_level, indicators, shape, param, n, legend_loc))
         
         # set up legend
         if level_name:
@@ -238,9 +256,12 @@ def spatial_indicator_grid(snapshots, param=None, indicators=None, shape=None, l
         axs[i][j].legend(lines, labels)
 
     else:
-        plot_spatial_indicator_grid(axs, snapshots, indicators, param, n, legend_loc)
+        plot_spatial_indicator_grid(axs, snapshots, indicators, shape, param, n, legend_loc)
 
     fig.tight_layout()
+
+    if return_fig:
+        return fig
 
 
 def plot_power_spectra(snapshots, param_values, param_label=None, precision=1):
