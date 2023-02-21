@@ -20,7 +20,7 @@ Biomass and water are exchanged between neighbouring cells through diffusion. He
 
 This model is a stochastic cellular automaton (Kefi et al. 2007) [[3]](https://doi.org/10.1016/j.tpb.2006.09.003) describing the states of cells: vegetated (+), empty (0) or degraded (-). The grid of cells evolves at each discrete time step through the transition probabilities:
 
-1. Colonisation: $w_{[0,+]}=\[\delta\rho_+ +(1-\delta)q_{+|0}\](b-c\rho_+)$
+1. Colonisation: $w_{[0,+]}=(\delta\rho_+ +(1-\delta)q_{+|0})(b-c\rho_+)$
 
 2. Mortality: $w_{[+,0]}=m$
 
@@ -42,7 +42,7 @@ $\frac{\partial P}{\partial t}=\left(cg_{max}\frac{W}{W+k_1}-d\right)P+D_P\nabla
 
 Plants grow depending on soil water availability and lost from natural mortality or grazing. Surface water is supplied by rainfall and lost due to soil infiltration and run off. Soil water due to soil infiltration is consumed by plants or lost by run off.
 
-Plants dispersal via seed or vegetative propagation, lateral surface water flow due to pressure differences and lateral subsurface water flow due to capillary forces can be approximated by diffusion terms.
+Plant dispersal via seed or vegetative propagation, lateral surface water flow due to pressure differences and lateral subsurface water flow due to capillary forces can be approximated by diffusion terms.
 
 The infiltration rate of water into soil is higher in vegetated areas. This leads to more surface water running off from areas with bare soil and subsequently being infiltrated into more vegetated soil so that water accumulates under vegetation and depletes further away. This can thus lead to the formation of self-organised patterns.
 
@@ -128,13 +128,13 @@ The spatial system is discretised into a lattice with periodic boundaries. The f
 
 The 5-point stencil approximation of the Laplace operator
 
-$\nabla^2 u_{i,j}=\frac{1}{\Delta x}^2(u_{i+1,j}+u_{i-1,j}+u_{i,j+1}+u_{i,j-1}-4u_{i,j})$
+$\nabla^2 u_{i,j}=\frac{1}{\Delta x^2}(u_{i+1,j}+u_{i-1,j}+u_{i,j+1}+u_{i,j-1}-4u_{i,j})$
 
 takes into account diffusion across nearest (top/bottom and left/right) neighbours and is generally numerically stable for sufficiently smooth fields.
 
 The 9-point stencil approximation (Provatas and Elder 2010) [[6]](https://doi.org/10.1002/9783527631520) of the Laplace operator
 
-$\nabla^2 u_{i,j}=\frac{1}{\Delta x}^2[0.5(u_{i+1,j}+u_{i-1,j}+u_{i,j+1}+u_{i,j-1})+0.25(u_{i+1,j+1}+u_{i-1,j+1}+u_{i-1,j+1}+u_{i-1,j-1})-3u_{i,j}]$
+$\nabla^2 u_{i,j}=\frac{1}{\Delta x^2}[0.5(u_{i+1,j}+u_{i-1,j}+u_{i,j+1}+u_{i,j-1})+0.25(u_{i+1,j+1}+u_{i-1,j+1}+u_{i-1,j+1}+u_{i-1,j-1})-3u_{i,j}]$
 
 takes into account diffusion across nearest and diagonal neighbours. Diagonal neighbours have half weight due to being further from the centre. Due to its more isotropic form, it is more numerically stable and thus more suitable for rapidly varying dynamics. The condition for numerical stability is $\Delta t<\frac{\Delta x^2}{2D}$ where $D$ is the diffusion constant of the variable.
 
