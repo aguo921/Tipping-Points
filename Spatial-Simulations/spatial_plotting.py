@@ -190,7 +190,7 @@ def plot_spatial_indicator_grid(axs, snapshots, indicators, shape, param, n, leg
     return line
 
 
-def spatial_indicator_grid(snapshots, param=None, indicators=None, shape=None, levels=None, level_name=None, n=1, legend_loc=None, return_fig=False):
+def spatial_indicator_grid(snapshots, param=None, indicators=None, shape=None, levels=None, level_name=None, n=1, legend_loc=None, return_fig=False, hide_legend=False):
     """ Plot spatial indicators against control parameter level. If there are multiple levels of snapshots, plot multiple 
         lines on each set of axes.
 
@@ -215,6 +215,8 @@ def spatial_indicator_grid(snapshots, param=None, indicators=None, shape=None, l
             Location of axes to place legend on.
         return_fig : bool, default=False
             Whether to return the figure object.
+        hide_legend : bool, default=False
+            Whether to hide the legend.
 
         Returns
         -------
@@ -252,8 +254,15 @@ def spatial_indicator_grid(snapshots, param=None, indicators=None, shape=None, l
         else:
             labels = levels
 
-        i, j = legend_loc
-        axs[i][j].legend(lines, labels)
+        if not hide_legend:
+            i, j = legend_loc
+            if nrows == 1:
+                ax = axs[j]
+            elif ncols == 1:
+                ax = axs[i]
+            else:
+                ax = axs[i][j]
+            ax.legend(lines, labels)
 
     else:
         plot_spatial_indicator_grid(axs, snapshots, indicators, shape, param, n, legend_loc)
