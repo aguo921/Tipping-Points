@@ -5,6 +5,10 @@ This project uses numerical simulations to investigate how systems change in res
 We look at several indicators that could act as early warning signals to upcoming transitions, 
 for both time-series models and spatial models.
 
+## Authors
+
+This project was undertaken by Angela Guo under the supervision of Associate Professor Graham Donovan in the 2022-2023 Summer Research Programme for the Department of Mathematics in the University of Auckland.
+
 ## Requirements
 
 This project is in Python 3.
